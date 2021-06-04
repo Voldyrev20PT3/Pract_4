@@ -1,36 +1,32 @@
 #include <iostream>
 #include <vector>
-#include <string>
+#include <iomanip>
 #include <fstream>
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/files.h>
 #include <cryptopp/sha.h>
+#include <string>
 using namespace std;
-int main ()
+int main (int argc, char* argv[])
 {
-    CryptoPP::SHA1 hash;
-
-    cout <<"Name: " << hash.AlgorithmName() << endl;
-    cout << "Diget size: " << hash.DigestSize() << endl;
-    cout << "Block size: " << hash.BlockSize() << endl;
-
-    string msg = "";
-    string stroka;
-    ifstream f("/home/student/msg.txt");
-    while (getline(f, stroka)) {
-        msg += stroka;
+    using namespace CryptoPP;
+    SHA1 hash;
+    std::cout << "Name: " << hash.AlgorithmName() << std::endl;
+    std::cout << "Digest size: " << hash.DigestSize() << std::endl;
+    std::cout << "Block size: " << hash.BlockSize() << std::endl;
+    std::string msg;
+    ifstream file;
+    file.open("/home/kali/Documents/pract_4/pract_4_1/pract_4.txt");
+    while (getline(file,msg)) {
+        std::vector<byte> digest(hash.DigestSize());
+        hash.Update((const byte*)msg.data(), msg.size());
+        hash.Final(digest.data());
+        std::cout << "Message: " << msg << std::endl;
+        std::cout << "Digest: ";
+        StringSource(digest.data(), digest.size(), true, new HexEncoder(new FileSink(std::cout)));
+        std::cout << std::endl;
     }
-
-    vector<byte> digest(hash.DigestSize());
-
-    hash.Update((const byte*)msg.data(), msg.size());
-    hash.Final(digest.data());
-
-    cout << "Message: " << msg << endl;
-
-    cout << "Digest: ";
-    CryptoPP::StringSource(digest.data(), digest.size(), true, new CryptoPP::HexEncoder(new CryptoPP::FileSink(cout)));
-    cout << endl;
+    file.close();
     return 0;
 }
